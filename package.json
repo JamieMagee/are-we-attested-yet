@@ -1,6 +1,7 @@
 {
   "name": "are-we-attested-yet",
   "version": "0.0.0",
+  "license": "MIT",
   "scripts": {
     "format": "biome format --write .",
     "start": "node src/index.mts"

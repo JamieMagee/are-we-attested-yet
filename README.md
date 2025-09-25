@@ -16,3 +16,7 @@ They use [Sigstore](https://sigstore.dev/) for keyless signing and are automatic
 
 - [Are we PEP 740 yet?](https://trailofbits.github.io/are-we-pep740-yet/) - Python attestation tracking
 - [Python Wheels](https://pythonwheels.com/) - Package adoption tracking
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
