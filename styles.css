@@ -1,0 +1,68 @@
+/* Modern circular progress indicator */
+.stats-circle {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: conic-gradient(
+    #16a34a 0deg var(--success-deg),
+    #eab308 var(--success-deg) var(--warning-deg),
+    #9ca3af var(--warning-deg) 360deg
+  );
+  position: relative;
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 0.1),
+    0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.stats-inner {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.06);
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .stats-circle {
+    background: conic-gradient(
+      #16a34a 0deg var(--success-deg),
+      #eab308 var(--success-deg) var(--warning-deg),
+      #6b7280 var(--warning-deg) 360deg
+    );
+  }
+
+  .stats-inner {
+    background: rgb(17 24 39); /* gray-900 */
+    box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.3);
+  }
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  transition-property:
+    color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+
+
+/* Focus styles for accessibility */
+a:focus-visible {
+  outline: 2px solid rgb(59 130 246); /* blue-500 */
+  outline-offset: 2px;
+}
+
+.rounded-full {
+  flex-shrink: 0;
+}

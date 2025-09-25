@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="icon" href="favicon.ico" />
+    <title>Are we attested yet? 🔏</title>
+  </head>
+  <body
+    class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors"
+  >
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="grid lg:grid-cols-2 gap-8 lg:gap-12">
+        <div class="space-y-8">
+          <h1
+            id="attestation-title"
+            class="text-4xl sm:text-5xl font-bold text-center text-gray-900 dark:text-white"
+          >
+            Are we attested yet? 🔏
+          </h1>
+
+          <!-- Statistics Display -->
+          <div class="flex justify-center">
+            <div id="stats-circle" class="stats-circle">
+              <div class="stats-inner">
+                <div
+                  class="text-2xl font-bold text-gray-900 dark:text-white"
+                  id="attested-count"
+                >
+                  -
+                </div>
+                <div
+                  class="text-sm text-gray-600 dark:text-gray-300"
+                  id="total-count"
+                >
+                  -
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <section class="space-y-4">
+            <h2
+              id="what-slsa"
+              class="text-2xl font-semibold text-gray-900 dark:text-white"
+            >
+              What is SLSA?
+            </h2>
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+              <a
+                href="https://slsa.dev/"
+                class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
+                >SLSA (Supply-chain Levels for Software Artifacts)</a
+              >
+              is a security framework for defining cryptographically verifiable
+              attestations about software artifacts, including their
+              <em class="italic">provenance</em> (e.g., the exact source
+              repository and build process that produced them).
+            </p>
+          </section>
+
+          <section class="space-y-4">
+            <h2
+              id="what-attestations"
+              class="text-2xl font-semibold text-gray-900 dark:text-white"
+            >
+              What are attestations?
+            </h2>
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+              Attestations are digitally signed, publicly verifiable statements
+              about npm packages, including their provenance and build
+              environment information.
+            </p>
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+              Attestations are built on top of
+              <a
+                href="https://sigstore.dev"
+                class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
+                >Sigstore</a
+              >
+              and use short-lived signing keys bound to trusted identities (like
+              GitHub Actions workflows), making them misuse-resistant and less
+              susceptible to key loss and theft.
+            </p>
+          </section>
+
+          <section class="space-y-4">
+            <h2
+              id="about-list"
+              class="text-2xl font-semibold text-gray-900 dark:text-white"
+            >
+              What is this list?
+            </h2>
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+              This site shows the top 500 most-downloaded packages on
+              <a
+                href="https://npmjs.org/"
+                class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
+                >npm</a
+              >
+              and which have SLSA attestations available.
+            </p>
+          </section>
+          <ul class="space-y-3">
+            <li class="flex items-center space-x-2">
+              <div class="w-4 h-4 bg-green-500 rounded-full"></div>
+              <span class="text-gray-700 dark:text-gray-300">
+                <span class="text-green-600 dark:text-green-400 font-medium"
+                  >Green</span
+                >
+                packages
+                <span id="success-percent" class="font-medium"></span> with a 🔏
+                have attestations for their latest release
+              </span>
+            </li>
+            <li class="flex items-center space-x-2">
+              <div class="w-4 h-4 bg-gray-400 rounded-full"></div>
+              <span class="text-gray-700 dark:text-gray-300">
+                <span class="text-gray-600 dark:text-gray-400 font-medium"
+                  >Grey</span
+                >
+                packages
+                <span id="grey-percent" class="font-medium"></span> with a ⏰
+                come from a supported platform but were uploaded before
+                attestations were available
+              </span>
+            </li>
+            <li class="flex items-center space-x-2">
+              <div class="w-4 h-4 bg-yellow-500 rounded-full"></div>
+              <span class="text-gray-700 dark:text-gray-300">
+                <span class="text-yellow-600 dark:text-yellow-400 font-medium"
+                  >Yellow</span
+                >
+                packages
+                <span id="warning-percent" class="font-medium"></span> come from
+                a supported platform but have no attestations (yet!)
+              </span>
+            </li>
+            <li class="flex items-center space-x-2">
+              <div class="w-4 h-4 bg-pink-500 rounded-full"></div>
+              <span class="text-gray-700 dark:text-gray-300">
+                <span class="text-pink-600 dark:text-pink-400 font-medium"
+                  >Pink</span
+                >
+                packages
+                <span id="pink-percent" class="font-medium"></span> with a 🚫
+                come from an unsupported platform
+              </span>
+            </li>
+          </ul>
+          <p
+            class="text-gray-700 dark:text-gray-300 leading-relaxed text-sm italic mt-4"
+          >
+            Attestations were available from April 19th 2023
+          </p>
+          <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+            If your package is incorrectly listed, please
+            <a
+              href="https://github.com/JamieMagee/are-we-attested-yet/issues/"
+              class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
+              >create an issue</a
+            >.
+          </p>
+
+          <section class="space-y-4">
+            <h2
+              id="consuming-attestations"
+              class="text-2xl font-semibold text-gray-900 dark:text-white"
+            >
+              I'm a user of npm packages. What can I do?
+            </h2>
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+              You can verify attestations for installed packages using the npm
+              CLI (version 9.5.0 or later):
+            </p>
+            <pre
+              class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 text-sm font-mono text-gray-800 dark:text-gray-200 overflow-x-auto"
+            ><code>npm audit signatures</code></pre>
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+              This will show you which packages in your project have verified
+              attestations. For more information, see the
+              <a
+                href="https://docs.npmjs.com/generating-provenance-statements#verifying-provenance-attestations"
+                class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
+                >npm documentation on verifying provenance</a
+              >.
+            </p>
+          </section>
+
+          <section class="space-y-4">
+            <h2
+              id="creating-attestations"
+              class="text-2xl font-semibold text-gray-900 dark:text-white"
+            >
+              My package has no attestations. What can I do?
+            </h2>
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+              The easiest way to enable attestations is to publish your packages
+              from GitHub Actions or GitLab CI/CD with the
+              <code
+                class="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-sm font-mono text-gray-800 dark:text-gray-200"
+                >--provenance</code
+              >
+              flag. See the
+              <a
+                href="https://docs.npmjs.com/generating-provenance-statements"
+                class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
+                >npm provenance documentation</a
+              >
+              for detailed setup instructions.
+            </p>
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+              You can also use
+              <a
+                href="https://docs.npmjs.com/trusted-publishers"
+                class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
+                >npm trusted publishers</a
+              >
+              which automatically generate attestations without requiring the
+              <code
+                class="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-sm font-mono text-gray-800 dark:text-gray-200"
+                >--provenance</code
+              >
+              flag.
+            </p>
+          </section>
+
+          <section class="space-y-4">
+            <h2
+              id="bugs"
+              class="text-2xl font-semibold text-gray-900 dark:text-white"
+            >
+              Something's wrong with this page!
+            </h2>
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+              Great! Please
+              <a
+                href="https://github.com/JamieMagee/are-we-attested-yet/issues/"
+                class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
+                >create an issue</a
+              >
+              to let us know!
+            </p>
+          </section>
+
+          <section class="space-y-4">
+            <h2
+              id="thanks"
+              class="text-2xl font-semibold text-gray-900 dark:text-white"
+            >
+              Thanks
+            </h2>
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+              This is inspired by
+              <a
+                href="https://trailofbits.github.io/are-we-pep740-yet/"
+                class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
+                >Are we PEP 740 yet?</a
+              >, which tracks attestations in the Python ecosystem. The top
+              package data comes from
+              <a
+                href="https://packages.ecosyste.ms/"
+                class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
+                >Ecosyste.ms</a
+              >.
+            </p>
+          </section>
+        </div>
+        <div class="lg:col-start-2">
+          <div class="sticky top-8">
+            <h3
+              class="text-xl font-semibold text-gray-900 dark:text-white mb-6 text-center lg:text-left"
+            >
+              Top 500 NPM Packages
+            </h3>
+            <div class="space-y-1 max-h-screen overflow-y-auto">
+              <div
+                id="loading-message"
+                class="text-center text-gray-600 dark:text-gray-400 py-8"
+              >
+                Loading package data...
+              </div>
+              <div id="package-list" class="space-y-1">
+                <!-- Package list will be populated here by JavaScript -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer
+        class="mt-16 pt-8 border-t border-gray-200 dark:border-gray-700 text-center text-gray-600 dark:text-gray-400"
+      >
+        <p class="mb-2">
+          Last updated <span id="last-updated" class="font-medium">-</span>.
+        </p>
+        <p class="text-sm">
+          Created by
+          <a
+            href="https://bsky.app/profile/jamiemagee.bsky.social"
+            class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Jamie Magee
+          </a>
+        </p>
+      </footer>
+    </div>
+
+    <script>
+      // Load and display attestation data
+      async function loadAttestationData() {
+        try {
+          const response = await fetch('output.json');
+          const report = await response.json();
+
+          // Update last updated date
+          const lastUpdate = new Date(report.generated_at).toLocaleDateString();
+          document.getElementById('last-updated').textContent = lastUpdate;
+
+          // Update counts
+          const totalCount = report.summary.total_packages;
+          const attestedCount = report.packages.filter(
+            (pkg) => pkg.attestationsUrl && pkg.attestationsUrl !== ''
+          ).length;
+          document.getElementById('total-count').textContent = totalCount;
+          document.getElementById('attested-count').textContent = attestedCount;
+
+          // Process packages for display
+          const packages = report.packages.map(function (pkg) {
+            let cssClass, icon, title;
+
+            // A package has SLSA provenance if attestationsUrl is not empty
+            const hasSLSAProvenance =
+              pkg.attestationsUrl && pkg.attestationsUrl !== '';
+
+            // Trusted publishing is a superset of SLSA provenance
+            const hasTrustedPublishing =
+              pkg.trustedPublisherId && pkg.trustedPublisherId !== '';
+
+            // Check if package was uploaded before attestations were available (April 19, 2023)
+            const attestationStartDate = new Date('2023-04-19');
+            const uploadDate = pkg.lastUploaded
+              ? new Date(pkg.lastUploaded)
+              : new Date();
+            const uploadedBeforeAttestations =
+              uploadDate < attestationStartDate;
+
+            // Use the actual supported platform status from the data
+            const isSupportedPlatform = pkg.isSupportedPlatform;
+
+            if (hasSLSAProvenance) {
+              cssClass = 'success';
+              icon = '🔏';
+              title = 'This package has attestations for their latest release';
+            } else if (isSupportedPlatform && uploadedBeforeAttestations) {
+              cssClass = 'grey';
+              icon = '⏰';
+              title =
+                'This package comes from a supported platform but was uploaded before attestations were available';
+            } else if (isSupportedPlatform && !hasSLSAProvenance) {
+              cssClass = 'warning';
+              icon = '➖';
+              title =
+                'This package comes from a supported platform but has no attestations (yet!)';
+            } else if (!isSupportedPlatform) {
+              cssClass = 'pink';
+              icon = '🚫';
+              title = 'This package comes from an unsupported platform';
+            } else {
+              cssClass = 'warning';
+              icon = '➖';
+              title =
+                'This package comes from a supported platform but has no attestations (yet!)';
+            }
+
+            return {
+              name: pkg.package,
+              css_class: cssClass,
+              icon: icon,
+              title: title,
+              downloads: 0, // Downloads not available in current data
+              rank: pkg.rank,
+            };
+          });
+
+          // Calculate percentages for display
+          const successCount = packages.filter(
+            (p) => p.css_class === 'success'
+          ).length;
+          const warningCount = packages.filter(
+            (p) => p.css_class === 'warning'
+          ).length;
+          const greyCount = packages.filter(
+            (p) => p.css_class === 'grey'
+          ).length;
+          const pinkCount = packages.filter(
+            (p) => p.css_class === 'pink'
+          ).length;
+
+          const successPercent = ((successCount / totalCount) * 100).toFixed(0);
+          const warningPercent = ((warningCount / totalCount) * 100).toFixed(0);
+          const greyPercent = ((greyCount / totalCount) * 100).toFixed(0);
+          const pinkPercent = ((pinkCount / totalCount) * 100).toFixed(0);
+
+          // Update percentage displays
+          document.getElementById(
+            'success-percent'
+          ).textContent = `(${successPercent}%)`;
+          document.getElementById(
+            'warning-percent'
+          ).textContent = `(${warningPercent}%)`;
+          document.getElementById(
+            'grey-percent'
+          ).textContent = `(${greyPercent}%)`;
+          document.getElementById(
+            'pink-percent'
+          ).textContent = `(${pinkPercent}%)`;
+
+          // Calculate degrees for conic gradient
+          const successDegree = (successCount / totalCount) * 360;
+          const warningDegree =
+            ((successCount + warningCount) / totalCount) * 360;
+
+          // Update stats circle gradient
+          const statsCircle = document.getElementById('stats-circle');
+          statsCircle.style.setProperty('--success-deg', `${successDegree}deg`);
+          statsCircle.style.setProperty('--warning-deg', `${warningDegree}deg`);
+
+          // Generate package list HTML
+          const packageListHtml = packages
+            .map((pkg) => {
+              let bgColor, hoverColor, textColor, iconColor;
+
+              if (pkg.css_class === 'success') {
+                bgColor = 'bg-green-50 dark:bg-green-900/20';
+                hoverColor = 'hover:bg-green-100 dark:hover:bg-green-900/30';
+                textColor = 'text-green-900 dark:text-green-100';
+                iconColor = 'text-green-600 dark:text-green-400';
+              } else if (pkg.css_class === 'warning') {
+                bgColor = 'bg-yellow-50 dark:bg-yellow-900/20';
+                hoverColor = 'hover:bg-yellow-100 dark:hover:bg-yellow-900/30';
+                textColor = 'text-yellow-900 dark:text-yellow-100';
+                iconColor = 'text-yellow-600 dark:text-yellow-400';
+              } else if (pkg.css_class === 'grey') {
+                bgColor = 'bg-gray-50 dark:bg-gray-800/50';
+                hoverColor = 'hover:bg-gray-100 dark:hover:bg-gray-700/50';
+                textColor = 'text-gray-900 dark:text-gray-100';
+                iconColor = 'text-gray-500 dark:text-gray-400';
+              } else if (pkg.css_class === 'pink') {
+                bgColor = 'bg-pink-50 dark:bg-pink-900/20';
+                hoverColor = 'hover:bg-pink-100 dark:hover:bg-pink-900/30';
+                textColor = 'text-pink-900 dark:text-pink-100';
+                iconColor = 'text-pink-600 dark:text-pink-400';
+              } else {
+                bgColor = 'bg-gray-50 dark:bg-gray-800/50';
+                hoverColor = 'hover:bg-gray-100 dark:hover:bg-gray-700/50';
+                textColor = 'text-gray-900 dark:text-gray-100';
+                iconColor = 'text-gray-500 dark:text-gray-400';
+              }
+
+              return `<a href="https://npmjs.org/package/${pkg.name}"
+                     class="flex items-center justify-between px-4 py-3 ${bgColor} ${hoverColor} ${textColor} rounded-lg border border-transparent hover:border-gray-200 dark:hover:border-gray-600 transition-all duration-200 group no-underline"
+                     title="${pkg.title}"
+                     target="_blank">
+                     <span class="font-medium truncate">${pkg.name}</span>
+                     <span class="${iconColor} ml-2 flex-shrink-0">${pkg.icon}</span>
+                   </a>`;
+            })
+            .join('');
+
+          // Update package list
+          document.getElementById('package-list').innerHTML = packageListHtml;
+
+          // Hide loading message
+          document.getElementById('loading-message').style.display = 'none';
+        } catch (error) {
+          console.error('Error loading attestation data:', error);
+          document.getElementById('loading-message').textContent =
+            'Error loading package data.';
+        }
+      }
+
+      // Load data when page is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadAttestationData);
+      } else {
+        loadAttestationData();
+      }
+    </script>
+  </body>
+</html>
