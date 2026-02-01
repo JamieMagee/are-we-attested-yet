@@ -14,7 +14,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.3.13",
     "@tsconfig/node-ts": "23.6.2",
-    "@tsconfig/node24": "24.0.3",
+    "@tsconfig/node24": "24.0.4",
     "@tsconfig/strictest": "2.0.8",
     "@types/node": "24.10.2",
     "typescript": "5.9.3"
