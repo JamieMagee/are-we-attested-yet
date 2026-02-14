@@ -1,14 +1,14 @@
-const http = require("http");
-const fs = require("fs");
-const path = require("path");
+import { readFile } from "node:fs";
+import { createServer } from "node:http";
+import { extname as _extname } from "node:path";
 
-const server = http.createServer((req, res) => {
-  let filePath = "." + req.url;
+const server = createServer((req, res) => {
+  let filePath = `.${req.url}`;
   if (filePath === "./") {
     filePath = "./index.html";
   }
 
-  const extname = String(path.extname(filePath)).toLowerCase();
+  const extname = String(_extname(filePath)).toLowerCase();
   const mimeTypes = {
     ".html": "text/html",
     ".js": "text/javascript",
@@ -29,16 +29,14 @@ const server = http.createServer((req, res) => {
 
   const contentType = mimeTypes[extname] || "application/octet-stream";
 
-  fs.readFile(filePath, (error, content) => {
+  readFile(filePath, (error, content) => {
     if (error) {
       if (error.code == "ENOENT") {
         res.writeHead(404, { "Content-Type": "text/html" });
         res.end("404 Not Found", "utf-8");
       } else {
         res.writeHead(500);
-        res.end(
-          "Sorry, check with the site admin for error: " + error.code + " ..\n",
-        );
+        res.end(`Sorry, check with the site admin for error: ${error.code} ..\n`);
       }
     } else {
       res.writeHead(200, {

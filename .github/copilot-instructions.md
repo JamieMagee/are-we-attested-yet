@@ -10,7 +10,7 @@ A static site tracking SLSA provenance attestations for the top 500 npm packages
 src/index.mts     → Data fetcher (generates output.json)
 output.json       → Package attestation data (generated, not committed)
 index.html        → Static frontend (loads output.json client-side)
-server.js         → Simple dev server (port 8081)
+server.mjs         → Simple dev server (port 8081)
 ```
 
 **Data flow**: Ecosyste.ms API → npm registry → `output.json` → browser
@@ -25,7 +25,7 @@ pnpm install
 pnpm start
 
 # Local development (after generating output.json)
-node server.js  # Visit http://localhost:8081
+node server.mjs  # Visit http://localhost:8081
 
 # Format code
 pnpm run format
