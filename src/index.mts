@@ -1,33 +1,22 @@
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-interface PackageListResponse {
+interface EcosystemsPackage {
   name: string;
+  repository_url: string | null;
+  latest_release_number: string | null;
+  latest_release_published_at: string | null;
 }
 
-interface NpmPackageMetadata {
-  "dist-tags": {
-    latest: string;
+interface NpmVersionMetadata {
+  dist?: {
+    attestations?: {
+      url: string;
+    };
   };
-  time?: {
-    [version: string]: string;
-  };
-  repository?: {
-    type: string;
-    url: string;
-  };
-  versions: {
-    [version: string]: {
-      dist?: {
-        attestations?: {
-          url: string;
-        };
-      };
-      _npmUser?: {
-        trustedPublisher?: {
-          id: string;
-        };
-      };
+  _npmUser?: {
+    trustedPublisher?: {
+      id: string;
     };
   };
 }
@@ -64,14 +53,16 @@ async function fetchWithRetry(
   throw new Error("Unreachable");
 }
 
-async function fetchTopNpmPackages(limit: number = 500): Promise<string[]> {
+async function fetchTopNpmPackages(
+  limit: number = 500,
+): Promise<EcosystemsPackage[]> {
   const baseUrl = "https://packages.ecosyste.ms/api/v1";
   const registry = "npmjs.org";
 
   try {
     const perPage = 100; // API max per page
     const totalPages = Math.ceil(limit / perPage);
-    const allPackages: string[] = [];
+    const allPackages: EcosystemsPackage[] = [];
 
     console.log(
       `Fetching top ${limit} npm packages across ${totalPages} pages...`,
@@ -82,11 +73,10 @@ async function fetchTopNpmPackages(limit: number = 500): Promise<string[]> {
 
       console.log(`Fetching page ${page}/${totalPages}...`);
       const response = await fetchWithRetry(url);
-      const data = (await response.json()) as PackageListResponse[];
+      const data = (await response.json()) as EcosystemsPackage[];
       console.log(`  Retrieved ${data.length} packages from page ${page}`);
 
-      const packageNames = data.map((pkg) => pkg.name);
-      allPackages.push(...packageNames);
+      allPackages.push(...data);
 
       console.log(`  Total packages so far: ${allPackages.length}`);
 
@@ -123,66 +113,71 @@ function isSupportedPlatform(repositoryUrl: string): boolean {
 }
 
 async function fetchPackageAttestation(
-  packageName: string,
+  pkg: EcosystemsPackage,
 ): Promise<AttestationResult | null> {
+  const latestVersion = pkg.latest_release_number;
+
+  if (!latestVersion) {
+    console.log(`⏭️  Skipping ${pkg.name} (no latest version)`);
+    return {
+      name: pkg.name,
+      version: "",
+      lastUploaded: pkg.latest_release_published_at || "",
+      attestationsUrl: "",
+      trustedPublisherId: "",
+      repositoryUrl: pkg.repository_url || "",
+    };
+  }
+
   try {
-    console.log(`🔍 Checking attestations for ${packageName}...`);
+    console.log(`🔍 Checking attestations for ${pkg.name}@${latestVersion}...`);
+    // Fetch only the specific version, not the full package document.
+    // This is dramatically smaller (~1-5 KB vs potentially 1+ MB for
+    // popular packages with many versions).
     const response = await fetchWithRetry(
-      `https://registry.npmjs.org/${packageName}`,
+      `https://registry.npmjs.org/${pkg.name}/${latestVersion}`,
     );
 
-    const metadata = (await response.json()) as NpmPackageMetadata;
-    const latestVersion = metadata["dist-tags"]?.latest;
-
-    if (!latestVersion || !metadata.versions[latestVersion]) {
-      return null;
-    }
-
-    const versionData = metadata.versions[latestVersion];
-    const attestations = versionData.dist?.attestations;
-    const lastUploaded = metadata.time?.[latestVersion] || "";
-    const attestationsUrl = attestations?.url || "";
+    const versionData = (await response.json()) as NpmVersionMetadata;
+    const attestationsUrl = versionData.dist?.attestations?.url || "";
     const trustedPublisher = versionData._npmUser?.trustedPublisher?.id || "";
-    const repositoryUrl = metadata.repository?.url || "";
 
     return {
-      name: packageName,
+      name: pkg.name,
       version: latestVersion,
-      lastUploaded,
+      lastUploaded: pkg.latest_release_published_at || "",
       attestationsUrl,
       trustedPublisherId: trustedPublisher,
-      repositoryUrl,
+      repositoryUrl: pkg.repository_url || "",
     };
   } catch (error) {
-    console.error(`❌ Error checking attestations for ${packageName}:`, error);
+    console.error(`❌ Error checking attestations for ${pkg.name}:`, error);
     return null;
   }
 }
 
 async function main() {
   try {
-    const packageNames = await fetchTopNpmPackages(500);
+    const topPackages = await fetchTopNpmPackages(500);
 
     console.log(
-      `\n🔎 Checking attestations for ${packageNames.length} packages...`,
+      `\n🔎 Checking attestations for ${topPackages.length} packages...`,
     );
 
     // Check attestations for each package in batches
     const attestationResults: AttestationResult[] = [];
     const batchSize = 10;
 
-    for (let i = 0; i < packageNames.length; i += batchSize) {
-      const batch = packageNames.slice(i, i + batchSize);
-      const batchPromises = batch.map((packageName) =>
-        fetchPackageAttestation(packageName),
-      );
+    for (let i = 0; i < topPackages.length; i += batchSize) {
+      const batch = topPackages.slice(i, i + batchSize);
+      const batchPromises = batch.map((pkg) => fetchPackageAttestation(pkg));
       const batchResults = await Promise.all(batchPromises);
       attestationResults.push(
         ...batchResults.filter((result) => result !== null),
       );
 
       // Add delay between batches
-      if (i + batchSize < packageNames.length) {
+      if (i + batchSize < topPackages.length) {
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     }
