@@ -1,12 +1,12 @@
-import { writeFileSync } from 'fs';
-import { join } from 'path';
+import { writeFileSync } from "node:fs";
+import { join } from "node:path";
 
 interface PackageListResponse {
   name: string;
 }
 
 interface NpmPackageMetadata {
-  'dist-tags': {
+  "dist-tags": {
     latest: string;
   };
   time?: {
@@ -65,8 +65,8 @@ async function fetchWithRetry(
 }
 
 async function fetchTopNpmPackages(limit: number = 500): Promise<string[]> {
-  const baseUrl = 'https://packages.ecosyste.ms/api/v1';
-  const registry = 'npmjs.org';
+  const baseUrl = "https://packages.ecosyste.ms/api/v1";
+  const registry = "npmjs.org";
 
   try {
     const perPage = 100; // API max per page
@@ -74,7 +74,7 @@ async function fetchTopNpmPackages(limit: number = 500): Promise<string[]> {
     const allPackages: string[] = [];
 
     console.log(
-      `Fetching top ${limit} npm packages across ${totalPages} pages...`
+      `Fetching top ${limit} npm packages across ${totalPages} pages...`,
     );
 
     for (let page = 1; page <= totalPages; page++) {
@@ -105,7 +105,7 @@ async function fetchTopNpmPackages(limit: number = 500): Promise<string[]> {
 
     return allPackages.slice(0, limit);
   } catch (error) {
-    console.error('Error fetching packages:', error);
+    console.error("Error fetching packages:", error);
     throw error;
   }
 }
@@ -117,13 +117,13 @@ function isSupportedPlatform(repositoryUrl: string): boolean {
 
   const url = repositoryUrl.toLowerCase();
   // Remove common prefixes and suffixes
-  const cleanUrl = url.replace(/^git\+/, '').replace(/\.git$/, '');
+  const cleanUrl = url.replace(/^git\+/, "").replace(/\.git$/, "");
 
-  return cleanUrl.includes('github.com') || cleanUrl.includes('gitlab.com');
+  return cleanUrl.includes("github.com") || cleanUrl.includes("gitlab.com");
 }
 
 async function fetchPackageAttestation(
-  packageName: string
+  packageName: string,
 ): Promise<AttestationResult | null> {
   try {
     console.log(`🔍 Checking attestations for ${packageName}...`);
@@ -132,7 +132,7 @@ async function fetchPackageAttestation(
     );
 
     const metadata = (await response.json()) as NpmPackageMetadata;
-    const latestVersion = metadata['dist-tags']?.latest;
+    const latestVersion = metadata["dist-tags"]?.latest;
 
     if (!latestVersion || !metadata.versions[latestVersion]) {
       return null;
@@ -140,10 +140,10 @@ async function fetchPackageAttestation(
 
     const versionData = metadata.versions[latestVersion];
     const attestations = versionData.dist?.attestations;
-    const lastUploaded = metadata.time?.[latestVersion] || '';
-    const attestationsUrl = attestations?.url || '';
-    const trustedPublisher = versionData._npmUser?.trustedPublisher?.id || '';
-    const repositoryUrl = metadata.repository?.url || '';
+    const lastUploaded = metadata.time?.[latestVersion] || "";
+    const attestationsUrl = attestations?.url || "";
+    const trustedPublisher = versionData._npmUser?.trustedPublisher?.id || "";
+    const repositoryUrl = metadata.repository?.url || "";
 
     return {
       name: packageName,
@@ -164,7 +164,7 @@ async function main() {
     const packageNames = await fetchTopNpmPackages(500);
 
     console.log(
-      `\n🔎 Checking attestations for ${packageNames.length} packages...`
+      `\n🔎 Checking attestations for ${packageNames.length} packages...`,
     );
 
     // Check attestations for each package in batches
@@ -174,11 +174,11 @@ async function main() {
     for (let i = 0; i < packageNames.length; i += batchSize) {
       const batch = packageNames.slice(i, i + batchSize);
       const batchPromises = batch.map((packageName) =>
-        fetchPackageAttestation(packageName)
+        fetchPackageAttestation(packageName),
       );
       const batchResults = await Promise.all(batchPromises);
       attestationResults.push(
-        ...batchResults.filter((result) => result !== null)
+        ...batchResults.filter((result) => result !== null),
       );
 
       // Add delay between batches
@@ -202,7 +202,7 @@ async function main() {
     // Calculate statistics
     const totalPackages = packages.length;
     const packagesWithAttestations = packages.filter(
-      (pkg) => pkg.attestationsUrl !== ''
+      (pkg) => pkg.attestationsUrl !== "",
     ).length;
 
     const attestationPercentage = (
@@ -211,7 +211,7 @@ async function main() {
     ).toFixed(1);
 
     // Write to JSON file
-    const outputPath = join(process.cwd(), 'output.json');
+    const outputPath = join(process.cwd(), "output.json");
     const report = {
       generated_at: new Date().toISOString(),
       summary: {
@@ -225,37 +225,37 @@ async function main() {
     writeFileSync(outputPath, JSON.stringify(report, null, 2));
 
     // Display results
-    console.log('\n📊 SLSA Attestation Report for Top 500 npm Packages');
-    console.log('='.repeat(60));
+    console.log("\n📊 SLSA Attestation Report for Top 500 npm Packages");
+    console.log("=".repeat(60));
     console.log(`📦 Total packages checked: ${totalPackages}`);
     console.log(
-      `📦 Packages with attestations: ${packagesWithAttestations} (${attestationPercentage}%)`
+      `📦 Packages with attestations: ${packagesWithAttestations} (${attestationPercentage}%)`,
     );
 
     console.log(`📄 Report saved to: ${outputPath}`);
 
     // Show examples
     const slsaPackages = packages.filter(
-      (pkg) => pkg.attestationsUrl !== '' && pkg.trustedPublisherId !== ''
+      (pkg) => pkg.attestationsUrl !== "" && pkg.trustedPublisherId !== "",
     );
     if (slsaPackages.length > 0) {
-      console.log('\n🎉 Packages with SLSA attestations:');
+      console.log("\n🎉 Packages with SLSA attestations:");
       slsaPackages.slice(0, 10).forEach((pkg) => {
         console.log(`  ${pkg.rank}. ${pkg.package}`);
       });
     }
 
     const noAttestationPackages = packages.filter(
-      (pkg) => pkg.attestationsUrl === ''
+      (pkg) => pkg.attestationsUrl === "",
     );
     if (noAttestationPackages.length > 0) {
-      console.log('\n⚠️  Packages WITHOUT attestations:');
+      console.log("\n⚠️  Packages WITHOUT attestations:");
       noAttestationPackages.slice(0, 10).forEach((pkg) => {
         console.log(`  ${pkg.rank}. ${pkg.package}`);
       });
     }
   } catch (error) {
-    console.error('Failed to generate attestation report:', error);
+    console.error("Failed to generate attestation report:", error);
     process.exit(1);
   }
 }
