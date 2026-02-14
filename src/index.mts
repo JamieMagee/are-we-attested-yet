@@ -41,6 +41,29 @@ interface AttestationResult {
   repositoryUrl: string;
 }
 
+async function fetchWithRetry(
+  url: string,
+  retries: number = 3,
+  baseDelay: number = 1000,
+): Promise<Response> {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    const response = await fetch(url);
+    if (response.ok) {
+      return response;
+    }
+    if (response.status >= 500 && attempt < retries) {
+      const delay = baseDelay * 2 ** (attempt - 1);
+      console.warn(
+        `  ⚠️ HTTP ${response.status} on attempt ${attempt}/${retries}, retrying in ${delay}ms...`,
+      );
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      continue;
+    }
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  throw new Error("Unreachable");
+}
+
 async function fetchTopNpmPackages(limit: number = 500): Promise<string[]> {
   const baseUrl = 'https://packages.ecosyste.ms/api/v1';
   const registry = 'npmjs.org';
@@ -58,14 +81,7 @@ async function fetchTopNpmPackages(limit: number = 500): Promise<string[]> {
       const url = `${baseUrl}/registries/${registry}/packages?per_page=${perPage}&page=${page}&order=desc&sort=downloads`;
 
       console.log(`Fetching page ${page}/${totalPages}...`);
-      const response = await fetch(url);
-
-      if (!response.ok) {
-        throw new Error(
-          `HTTP error! status: ${response.status} for page ${page}`
-        );
-      }
-
+      const response = await fetchWithRetry(url);
       const data = (await response.json()) as PackageListResponse[];
       console.log(`  Retrieved ${data.length} packages from page ${page}`);
 
@@ -111,11 +127,9 @@ async function fetchPackageAttestation(
 ): Promise<AttestationResult | null> {
   try {
     console.log(`🔍 Checking attestations for ${packageName}...`);
-    const response = await fetch(`https://registry.npmjs.org/${packageName}`);
-
-    if (!response.ok) {
-      return null;
-    }
+    const response = await fetchWithRetry(
+      `https://registry.npmjs.org/${packageName}`,
+    );
 
     const metadata = (await response.json()) as NpmPackageMetadata;
     const latestVersion = metadata['dist-tags']?.latest;

@@ -55,8 +55,6 @@
   transition-duration: 150ms;
 }
 
-
-
 /* Focus styles for accessibility */
 a:focus-visible {
   outline: 2px solid rgb(59 130 246); /* blue-500 */
