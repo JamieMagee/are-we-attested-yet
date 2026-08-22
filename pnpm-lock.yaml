@@ -12,8 +12,8 @@ importers:
         specifier: 2.3.15
         version: 2.3.15
       '@tsconfig/node-ts':
-        specifier: 23.6.3
-        version: 23.6.3
+        specifier: 23.6.4
+        version: 23.6.4
       '@tsconfig/node24':
         specifier: 24.0.4
         version: 24.0.4
@@ -82,8 +82,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@tsconfig/node-ts@23.6.3':
-    resolution: {integrity: sha512-ZnYCOAKQwB90EFAbg8+i7J6UTw3QHuqUO5kYQeiYTs2ALUDL/ujJjR+Jk2FPwpQjKCzWkt+iIisd6+8pndBnzQ==}
+  '@tsconfig/node-ts@23.6.4':
+    resolution: {integrity: sha512-37BMJvNQZ+vTgd1xG2TGBkJ6ENeT4eO4Wh2CHrnn0IwH7ybLFCzh4Uc//kc7UIvqiRac4uGdIc1meKOjMSlKzw==}
 
   '@tsconfig/node24@24.0.4':
     resolution: {integrity: sha512-2A933l5P5oCbv6qSxHs7ckKwobs8BDAe9SJ/Xr2Hy+nDlwmLE1GhFh/g/vXGRZWgxBg9nX/5piDtHR9Dkw/XuA==}
@@ -139,7 +139,7 @@ snapshots:
   '@biomejs/cli-win32-x64@2.3.15':
     optional: true
 
-  '@tsconfig/node-ts@23.6.3': {}
+  '@tsconfig/node-ts@23.6.4': {}
 
   '@tsconfig/node24@24.0.4': {}
 
