@@ -15,7 +15,7 @@
     "@biomejs/biome": "2.6.4",
     "@tsconfig/node-ts": "23.6.4",
     "@tsconfig/node24": "24.0.5",
-    "@tsconfig/strictest": "2.0.8",
+    "@tsconfig/strictest": "2.0.9",
     "@types/node": "24.19.2",
     "typescript": "7.0.2"
   }
